@@ -1222,7 +1222,9 @@ public class UI extends JFrame {
 			}
 		}
 
-		System.out.println(sb.toString());
+		CommandDialog diag=new CommandDialog(sb.toString());
+		diag.setLocationRelativeTo(null);
+		diag.setVisible(true);
 	}
 	
 	private void addCommand(StringBuilder sb, String s) {
