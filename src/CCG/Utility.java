@@ -37,6 +37,12 @@ public class Utility {
 		return bits;
 	}
 	
+	public static boolean [] getSubnetBitsV6 (int subnet) {
+		boolean [] bits=new boolean [128];
+		for (int i=0;i<subnet;i++) bits[i]=true;
+		return bits;
+	}
+	
 	public static String getSubnetAddress (String hostAdd, int subnet) {
 		String [] split=hostAdd.split("\\.");
 		boolean [] bits=new boolean [32];
@@ -64,4 +70,44 @@ public class Utility {
 		return returnS;
 	}
 	
+	public static String getSubnetAddressV6 (String hostAdd, int subnet) {
+		hostAdd=hostAdd.replace("::",":0:");
+		String [] split=hostAdd.split(":");
+		for (int i=0;i<8-split.length;i++) {
+			hostAdd=hostAdd.replaceFirst(":0:",":0:0:");
+		}
+		split=hostAdd.split(":");
+
+		boolean [] bits=new boolean [128];
+		int count=0;
+		for (int i=0;i<split.length;i++) {
+			String decimal=split[i];
+			while (decimal.length()<4) decimal="0"+decimal;
+			for (int i2=0;i2<4;i2++) {
+				String binary=Integer.toBinaryString(Integer.parseInt(decimal.charAt(i2)+"",16));
+				while (binary.length()<4) binary="0"+binary;
+				for (int i3=0;i3<4;i3++) {
+					bits[count++]=(binary.charAt(i3)=='1');
+				}
+			}
+		}
+		
+
+		boolean [] subnetBits=getSubnetBitsV6(subnet);
+		boolean [] result=new boolean [128];
+		for (int i=0;i<128;i++) {
+			result[i]=bits[i] && subnetBits[i];
+		}
+		
+		String s="";
+		for (int i=0;i<128;i++) {
+			if (result[i]) s+="1"; else s+="0";
+		}
+
+		String returnS="";
+		for (int i=0;i<8;i++) {
+			returnS+=Integer.toHexString(Integer.parseInt(s.substring(i*16,(i+1)*16),2))+":";
+		}
+		return returnS.substring(0,returnS.length()-1);
+	}
 }

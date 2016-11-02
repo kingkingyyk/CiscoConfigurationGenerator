@@ -23,11 +23,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.awt.event.ActionEvent;
-import javax.swing.DefaultComboBoxModel;
 
 public class UI extends JFrame {
-
+	private static final long serialVersionUID = 4825412069624844585L;
 	private JPanel contentPane;
 	private JTextField textFieldL3Interface;
 	private JTextField textFieldIpv4Address;
@@ -38,12 +38,11 @@ public class UI extends JFrame {
 	private JTextField textFieldOSPFv3;
 	private JTable tableStaticRouting;
 	private JTextField textFieldHostname;
-	private JTable tableSummaryAddress;
+	private JTable tableOSPFSummaryAddress;
 	private JTable tableVLAN;
 	private JTextField textFieldPortFast;
 	private JTextField textFieldTrunk;
 	private JTextField textFieldOSPFPassiveInterfaces;
-	private JTextField textFieldEIGRPassiveInterfaces;
 	private JTextField textFieldEIGRPPassiveInterfaces;
 	private JTextField textFieldBGPASNumber;
 	private JTable tableBGPNeighbors;
@@ -80,14 +79,6 @@ public class UI extends JFrame {
 	private JCheckBox chckbxEIGRPRedistributeBgpV6;
 	private JCheckBox chckbxEIGRPRedistributeRipng;
 	private JCheckBox chckbxEIGRPRedistributeStaticV6;
-	private JCheckBox chckbxBGPRedistributeOSPF;
-	private JCheckBox chckbxBGPRedistributeOspfV;
-	private JCheckBox chckbxBGPRedistributeEigrp;
-	private JCheckBox chckbxBGPRedistributeEigrpV;
-	private JCheckBox chckbxBGPRedistributeRip;
-	private JCheckBox chckbxBGPRedistributeRipng;
-	private JCheckBox chckbxBGPRedistributeStatic;
-	private JCheckBox chckbxBGPRedistributeStaticV6;
 	private JCheckBox chckbxSwitchLegacyIOS;
 	private JComboBox<String> comboBoxSTP;
 	private JCheckBox chckbxBackboneFast;
@@ -96,6 +87,15 @@ public class UI extends JFrame {
 	private JTextField textFieldHSRPV3ID;
 	private JTextField textFieldBGPAS;
 	private JTextField textFieldBGPV3AS;
+	private JTextField textFieldOSPFPassiveInterfacesV3;
+	private JLabel lblOSPFPassiveInterfacesV3;
+	private JLabel lblOSPFRedistributeBGPAS;
+	private JTextField textFieldOSPFRedistributeBGPAS;
+	private JTextField textFieldEIGRPPassiveInterfacesV6;
+	private JLabel lblEIGRPPassiveInterfacesV6;
+	private JTextField textFieldEIGRPRedistributeBGPAS;
+	private JLabel lblEIGRPRedistributeBGPAS;
+	private JCheckBox chckbxRootguard;
 
 	/**
 	 * Launch the application.
@@ -531,11 +531,25 @@ public class UI extends JFrame {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
 		JButton btnAddNewStaticRoute = new JButton("Add");
+		btnAddNewStaticRoute.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				((DefaultTableModel)tableStaticRouting.getModel()).addRow(new String [] {"","",""});
+			}
+		});
 		panel.add(btnAddNewStaticRoute);
 		
 		JButton btnDeleteStaticRoute = new JButton("Delete");
 		btnDeleteStaticRoute.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				int [] rows=tableStaticRouting.getSelectedRows();
+				Arrays.sort(rows);
+				for (int i=0;i<rows.length;i++) {
+					rows[i]=rows[i]-i;
+				}
+				
+				for (int i=0;i<rows.length;i++) {
+					((DefaultTableModel)tableStaticRouting.getModel()).removeRow(rows[i]);
+				}
 			}
 		});
 		panel.add(btnDeleteStaticRoute);
@@ -548,10 +562,29 @@ public class UI extends JFrame {
 		scrollPaneSummaryAddress = new JScrollPane();
 		
 		JButton btnAddSummaryAddress = new JButton("Add");
+		btnAddSummaryAddress.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				((DefaultTableModel)tableOSPFSummaryAddress.getModel()).addRow(new String [] {"","",""});
+			}
+		});
 		
 		JButton btnDeleteSummaryAddress = new JButton("Delete");
+		btnDeleteSummaryAddress.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int [] rows=tableOSPFSummaryAddress.getSelectedRows();
+				Arrays.sort(rows);
+				for (int i=0;i<rows.length;i++) {
+					rows[i]-=i;
+				}
+				
+				for (int row : rows) {
+					((DefaultTableModel)tableOSPFSummaryAddress.getModel()).removeRow(row);
+				}
+			}
+		});
 		
 		JLabel lblOSPFPassiveInterfaces = new JLabel("Passive Interfaces :");
+		lblOSPFPassiveInterfaces.setHorizontalAlignment(SwingConstants.RIGHT);
 		
 		textFieldOSPFPassiveInterfaces = new JTextField();
 		textFieldOSPFPassiveInterfaces.setColumns(10);
@@ -571,41 +604,65 @@ public class UI extends JFrame {
 		chckbxOSPFRedistributeStatic = new JCheckBox("Redistribute Static");
 		
 		chckbxOSPFRedistributeStaticV6 = new JCheckBox("Redistribute Static");
+		
+		textFieldOSPFPassiveInterfacesV3 = new JTextField();
+		textFieldOSPFPassiveInterfacesV3.setColumns(10);
+		
+		lblOSPFPassiveInterfacesV3 = new JLabel("Passive Interfaces v3 :");
+		
+		lblOSPFRedistributeBGPAS = new JLabel("BGP AS :");
+		
+		textFieldOSPFRedistributeBGPAS = new JTextField();
+		textFieldOSPFRedistributeBGPAS.setColumns(10);
 		GroupLayout gl_panelOSPF = new GroupLayout(panelOSPF);
 		gl_panelOSPF.setHorizontalGroup(
 			gl_panelOSPF.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelOSPF.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPaneSummaryAddress, GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
-						.addGroup(gl_panelOSPF.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, gl_panelOSPF.createSequentialGroup()
+							.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_panelOSPF.createSequentialGroup()
+									.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING)
+										.addComponent(chckbxOSPFRedistributeEigrp)
+										.addComponent(chckbxOSPFRedistributeEigrpV6))
+									.addGap(18))
+								.addGroup(Alignment.TRAILING, gl_panelOSPF.createSequentialGroup()
+									.addComponent(lblOSPFRedistributeBGPAS)
+									.addPreferredGap(ComponentPlacement.RELATED)))
+							.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_panelOSPF.createSequentialGroup()
+									.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING)
+										.addComponent(chckbxOSPFRedistributeBgp, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
+										.addComponent(chckbxOSPFRedistributeBgpV6, GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE))
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING)
+										.addGroup(gl_panelOSPF.createSequentialGroup()
+											.addComponent(chckbxOSPFRedistributeRipng, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
+											.addPreferredGap(ComponentPlacement.RELATED)
+											.addComponent(chckbxOSPFRedistributeStaticV6, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE))
+										.addGroup(gl_panelOSPF.createSequentialGroup()
+											.addComponent(chckbxOSPFRedistributeRip, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
+											.addPreferredGap(ComponentPlacement.UNRELATED)
+											.addComponent(chckbxOSPFRedistributeStatic, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE))))
+								.addGroup(gl_panelOSPF.createSequentialGroup()
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(textFieldOSPFRedistributeBGPAS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))
+						.addComponent(scrollPaneSummaryAddress, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 529, Short.MAX_VALUE)
+						.addGroup(Alignment.TRAILING, gl_panelOSPF.createSequentialGroup()
 							.addComponent(lblSummaryAddress)
-							.addPreferredGap(ComponentPlacement.RELATED, 307, Short.MAX_VALUE)
+							.addPreferredGap(ComponentPlacement.RELATED, 316, Short.MAX_VALUE)
 							.addComponent(btnAddSummaryAddress)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnDeleteSummaryAddress))
-						.addGroup(gl_panelOSPF.createSequentialGroup()
-							.addComponent(lblOSPFPassiveInterfaces, GroupLayout.PREFERRED_SIZE, 101, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addComponent(textFieldOSPFPassiveInterfaces, GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE))
-						.addGroup(gl_panelOSPF.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, gl_panelOSPF.createSequentialGroup()
+							.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING, false)
+								.addComponent(lblOSPFPassiveInterfaces, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(lblOSPFPassiveInterfacesV3, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+							.addGap(8)
 							.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING)
-								.addComponent(chckbxOSPFRedistributeEigrp)
-								.addComponent(chckbxOSPFRedistributeEigrpV6))
-							.addGap(18)
-							.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING)
-								.addComponent(chckbxOSPFRedistributeBgp, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-								.addComponent(chckbxOSPFRedistributeBgpV6, GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addGroup(gl_panelOSPF.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_panelOSPF.createSequentialGroup()
-									.addComponent(chckbxOSPFRedistributeRipng, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(chckbxOSPFRedistributeStaticV6, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE))
-								.addGroup(gl_panelOSPF.createSequentialGroup()
-									.addComponent(chckbxOSPFRedistributeRip, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.UNRELATED)
-									.addComponent(chckbxOSPFRedistributeStatic, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)))))
+								.addComponent(textFieldOSPFPassiveInterfacesV3, GroupLayout.DEFAULT_SIZE, 410, Short.MAX_VALUE)
+								.addComponent(textFieldOSPFPassiveInterfaces, GroupLayout.DEFAULT_SIZE, 410, Short.MAX_VALUE))))
 					.addContainerGap())
 		);
 		gl_panelOSPF.setVerticalGroup(
@@ -617,12 +674,16 @@ public class UI extends JFrame {
 						.addComponent(btnAddSummaryAddress)
 						.addComponent(btnDeleteSummaryAddress))
 					.addGap(8)
-					.addComponent(scrollPaneSummaryAddress, GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+					.addComponent(scrollPaneSummaryAddress, GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addGroup(gl_panelOSPF.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblOSPFPassiveInterfaces)
 						.addComponent(textFieldOSPFPassiveInterfaces, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addGap(18)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(gl_panelOSPF.createParallelGroup(Alignment.BASELINE)
+						.addComponent(textFieldOSPFPassiveInterfacesV3, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblOSPFPassiveInterfacesV3))
+					.addGap(6)
 					.addGroup(gl_panelOSPF.createParallelGroup(Alignment.BASELINE)
 						.addComponent(chckbxOSPFRedistributeEigrp)
 						.addComponent(chckbxOSPFRedistributeBgp)
@@ -634,19 +695,24 @@ public class UI extends JFrame {
 						.addComponent(chckbxOSPFRedistributeBgpV6)
 						.addComponent(chckbxOSPFRedistributeRipng)
 						.addComponent(chckbxOSPFRedistributeStaticV6))
-					.addGap(85))
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(gl_panelOSPF.createParallelGroup(Alignment.BASELINE)
+						.addComponent(lblOSPFRedistributeBGPAS)
+						.addComponent(textFieldOSPFRedistributeBGPAS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addGap(42))
 		);
 		
-		tableSummaryAddress = new JTable();
-		tableSummaryAddress.setModel(new DefaultTableModel(
+		tableOSPFSummaryAddress = new JTable();
+		tableOSPFSummaryAddress.setModel(new DefaultTableModel(
 			new Object[][] {
 			},
 			new String[] {
-				"Area", "Address"
+				"Area", "Address", "Subnet Prefix"
 			}
 		));
-		tableSummaryAddress.getColumnModel().getColumn(0).setPreferredWidth(164);
-		scrollPaneSummaryAddress.setViewportView(tableSummaryAddress);
+		tableOSPFSummaryAddress.getColumnModel().getColumn(0).setPreferredWidth(164);
+		tableOSPFSummaryAddress.getColumnModel().getColumn(1).setPreferredWidth(89);
+		scrollPaneSummaryAddress.setViewportView(tableOSPFSummaryAddress);
 		panelOSPF.setLayout(gl_panelOSPF);
 		
 		JPanel panelEIGRP = new JPanel();
@@ -674,33 +740,55 @@ public class UI extends JFrame {
 		chckbxEIGRPRedistributeRipng = new JCheckBox("Redistribute RIPng");
 		
 		chckbxEIGRPRedistributeStaticV6 = new JCheckBox("Redistribute Static");
+		
+		textFieldEIGRPPassiveInterfacesV6 = new JTextField();
+		textFieldEIGRPPassiveInterfacesV6.setColumns(10);
+		
+		lblEIGRPPassiveInterfacesV6 = new JLabel("Passive Interfaces V6 :");
+		
+		textFieldEIGRPRedistributeBGPAS = new JTextField();
+		textFieldEIGRPRedistributeBGPAS.setColumns(10);
+		
+		lblEIGRPRedistributeBGPAS = new JLabel("BGP AS :");
 		GroupLayout gl_panelEIGRP = new GroupLayout(panelEIGRP);
 		gl_panelEIGRP.setHorizontalGroup(
 			gl_panelEIGRP.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelEIGRP.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_panelEIGRP.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panelEIGRP.createSequentialGroup()
-							.addComponent(chckbxEIGRPRedistributeOSPFv3, GroupLayout.PREFERRED_SIZE, 131, GroupLayout.PREFERRED_SIZE)
-							.addGap(18)
-							.addComponent(chckbxEIGRPRedistributeBgpV6, GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(chckbxEIGRPRedistributeRipng, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(chckbxEIGRPRedistributeStaticV6, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE))
+						.addGroup(Alignment.TRAILING, gl_panelEIGRP.createParallelGroup(Alignment.LEADING)
+							.addGroup(gl_panelEIGRP.createSequentialGroup()
+								.addComponent(chckbxEIGRPRedistributeOspf, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
+								.addGap(32)
+								.addComponent(chckbxEIGRPRedistributeBgp, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
+								.addGap(18)
+								.addComponent(chckbxEIGRPRedistributeRip, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(chckbxEIGRPRedistributeStatic, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE))
+							.addGroup(gl_panelEIGRP.createSequentialGroup()
+								.addComponent(chckbxEIGRPRedistributeOSPFv3, GroupLayout.PREFERRED_SIZE, 131, GroupLayout.PREFERRED_SIZE)
+								.addGap(18)
+								.addGroup(gl_panelEIGRP.createParallelGroup(Alignment.LEADING)
+									.addGroup(gl_panelEIGRP.createSequentialGroup()
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(lblEIGRPRedistributeBGPAS)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(textFieldEIGRPRedistributeBGPAS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+									.addGroup(gl_panelEIGRP.createSequentialGroup()
+										.addComponent(chckbxEIGRPRedistributeBgpV6, GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(chckbxEIGRPRedistributeRipng, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(chckbxEIGRPRedistributeStaticV6, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)))))
 						.addComponent(chckbxEIGRPNoSummary)
-						.addGroup(gl_panelEIGRP.createSequentialGroup()
-							.addComponent(lblEIGRPPassiveInterfaces, GroupLayout.PREFERRED_SIZE, 101, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
-							.addComponent(textFieldEIGRPPassiveInterfaces, GroupLayout.PREFERRED_SIZE, 409, GroupLayout.PREFERRED_SIZE))
-						.addGroup(gl_panelEIGRP.createSequentialGroup()
-							.addComponent(chckbxEIGRPRedistributeOspf, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-							.addGap(32)
-							.addComponent(chckbxEIGRPRedistributeBgp, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-							.addGap(18)
-							.addComponent(chckbxEIGRPRedistributeRip, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(chckbxEIGRPRedistributeStatic, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)))
+						.addGroup(Alignment.TRAILING, gl_panelEIGRP.createSequentialGroup()
+							.addGroup(gl_panelEIGRP.createParallelGroup(Alignment.LEADING, false)
+								.addComponent(lblEIGRPPassiveInterfacesV6, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(lblEIGRPPassiveInterfaces, GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE))
+							.addPreferredGap(ComponentPlacement.UNRELATED)
+							.addGroup(gl_panelEIGRP.createParallelGroup(Alignment.TRAILING)
+								.addComponent(textFieldEIGRPPassiveInterfaces, GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
+								.addComponent(textFieldEIGRPPassiveInterfacesV6))))
 					.addContainerGap())
 		);
 		gl_panelEIGRP.setVerticalGroup(
@@ -712,8 +800,11 @@ public class UI extends JFrame {
 					.addGroup(gl_panelEIGRP.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblEIGRPPassiveInterfaces)
 						.addComponent(textFieldEIGRPPassiveInterfaces, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(gl_panelEIGRP.createParallelGroup(Alignment.BASELINE)
+						.addComponent(textFieldEIGRPPassiveInterfacesV6, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblEIGRPPassiveInterfacesV6))
+					.addGap(9)
 					.addGroup(gl_panelEIGRP.createParallelGroup(Alignment.BASELINE)
 						.addComponent(chckbxEIGRPRedistributeOspf)
 						.addComponent(chckbxEIGRPRedistributeBgp)
@@ -725,7 +816,11 @@ public class UI extends JFrame {
 						.addComponent(chckbxEIGRPRedistributeBgpV6)
 						.addComponent(chckbxEIGRPRedistributeRipng)
 						.addComponent(chckbxEIGRPRedistributeStaticV6))
-					.addContainerGap(194, Short.MAX_VALUE))
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(gl_panelEIGRP.createParallelGroup(Alignment.BASELINE)
+						.addComponent(textFieldEIGRPRedistributeBGPAS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblEIGRPRedistributeBGPAS))
+					.addContainerGap(139, Short.MAX_VALUE))
 		);
 		panelEIGRP.setLayout(gl_panelEIGRP);
 		
@@ -742,28 +837,26 @@ public class UI extends JFrame {
 		JScrollPane scrollPane_2 = new JScrollPane();
 		
 		JButton btnBGPAddNeighbor = new JButton("Add");
+		btnBGPAddNeighbor.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				((DefaultTableModel)tableBGPNeighbors.getModel()).addRow(new String [] {"",""});
+			}
+		});
 		
 		JButton btnBGPDeleteNeighbor = new JButton("Delete");
-		
-		chckbxBGPRedistributeOSPF = new JCheckBox("Redistribute OSPF");
-		
-		chckbxBGPRedistributeEigrp = new JCheckBox("Redistribute EIGRP");
-		
-		chckbxBGPRedistributeRip = new JCheckBox("Redistribute RIP");
-		
-		chckbxBGPRedistributeStatic = new JCheckBox("Redistribute Static");
-		
-		chckbxBGPRedistributeOspfV = new JCheckBox("Redistribute OSPF v3");
-		
-		chckbxBGPRedistributeEigrpV = new JCheckBox("Redistribute EIGRP v6");
-		
-		chckbxBGPRedistributeRipng = new JCheckBox("Redistribute RIPng");
-		
-		chckbxBGPRedistributeStaticV6 = new JCheckBox("Redistribute Static");
+		btnBGPDeleteNeighbor.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int [] rows=tableBGPNeighbors.getSelectedRows();
+				Arrays.sort(rows);
+				for (int i=0;i<rows.length;i++) rows[i]-=i;
+				
+				for (int row : rows) ((DefaultTableModel)tableBGPNeighbors.getModel()).removeRow(row);
+			}
+		});
 		GroupLayout gl_panelBGP = new GroupLayout(panelBGP);
 		gl_panelBGP.setHorizontalGroup(
-			gl_panelBGP.createParallelGroup(Alignment.TRAILING)
-				.addGroup(Alignment.LEADING, gl_panelBGP.createSequentialGroup()
+			gl_panelBGP.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelBGP.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_panelBGP.createParallelGroup(Alignment.LEADING)
 						.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
@@ -776,27 +869,7 @@ public class UI extends JFrame {
 							.addPreferredGap(ComponentPlacement.RELATED, 323, Short.MAX_VALUE)
 							.addComponent(btnBGPAddNeighbor, GroupLayout.PREFERRED_SIZE, 51, GroupLayout.PREFERRED_SIZE)
 							.addGap(13)
-							.addComponent(btnBGPDeleteNeighbor, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE))
-						.addGroup(gl_panelBGP.createSequentialGroup()
-							.addGroup(gl_panelBGP.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_panelBGP.createSequentialGroup()
-									.addComponent(chckbxBGPRedistributeOSPF)
-									.addGap(12)
-									.addComponent(chckbxBGPRedistributeEigrp))
-								.addGroup(gl_panelBGP.createSequentialGroup()
-									.addComponent(chckbxBGPRedistributeOspfV)
-									.addPreferredGap(ComponentPlacement.UNRELATED)
-									.addComponent(chckbxBGPRedistributeEigrpV)))
-							.addGap(18)
-							.addGroup(gl_panelBGP.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_panelBGP.createSequentialGroup()
-									.addComponent(chckbxBGPRedistributeRipng)
-									.addGap(6)
-									.addComponent(chckbxBGPRedistributeStaticV6, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE))
-								.addGroup(gl_panelBGP.createSequentialGroup()
-									.addComponent(chckbxBGPRedistributeRip)
-									.addGap(18)
-									.addComponent(chckbxBGPRedistributeStatic, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)))))
+							.addComponent(btnBGPDeleteNeighbor, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE)))
 					.addContainerGap())
 		);
 		gl_panelBGP.setVerticalGroup(
@@ -813,25 +886,12 @@ public class UI extends JFrame {
 						.addComponent(btnBGPDeleteNeighbor))
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
-					.addGap(18)
-					.addGroup(gl_panelBGP.createParallelGroup(Alignment.BASELINE)
-						.addComponent(chckbxBGPRedistributeOSPF)
-						.addComponent(chckbxBGPRedistributeStatic)
-						.addComponent(chckbxBGPRedistributeRip)
-						.addComponent(chckbxBGPRedistributeEigrp))
-					.addGap(2)
-					.addGroup(gl_panelBGP.createParallelGroup(Alignment.BASELINE)
-						.addComponent(chckbxBGPRedistributeOspfV)
-						.addComponent(chckbxBGPRedistributeEigrpV)
-						.addComponent(chckbxBGPRedistributeRipng)
-						.addComponent(chckbxBGPRedistributeStaticV6))
-					.addContainerGap())
+					.addGap(73))
 		);
 		
 		tableBGPNeighbors = new JTable();
 		tableBGPNeighbors.setModel(new DefaultTableModel(
 			new Object[][] {
-				{null, null},
 			},
 			new String[] {
 				"IP Address", "Remote-AS"
@@ -851,16 +911,27 @@ public class UI extends JFrame {
 		JButton btnAddVLAN = new JButton("Add VLAN");
 		btnAddVLAN.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				((DefaultTableModel)tableVLAN.getModel()).addRow(new String [] {"","","","","","",""});
 			}
 		});
 		
 		JButton btnDeleteVLAN = new JButton("Delete VLAN");
+		btnDeleteVLAN.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int [] rows=tableVLAN.getSelectedRows();
+				for (int i=0;i<rows.length;i++) rows[i]-=i;
+				
+				for (int row : rows) ((DefaultTableModel)tableVLAN.getModel()).removeRow(row);
+			}
+		});
 		
 		JLabel lblTrunk = new JLabel("Trunk :");
 		lblTrunk.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		textFieldTrunk = new JTextField();
 		textFieldTrunk.setColumns(10);
+		
+		chckbxRootguard = new JCheckBox("RootGuard");
 		GroupLayout gl_panelVLAN = new GroupLayout(panelVLAN);
 		gl_panelVLAN.setHorizontalGroup(
 			gl_panelVLAN.createParallelGroup(Alignment.LEADING)
@@ -870,7 +941,9 @@ public class UI extends JFrame {
 						.addComponent(scrollPaneVLAN, GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
 						.addGroup(gl_panelVLAN.createSequentialGroup()
 							.addComponent(chckbxSwitchLegacyIOS)
-							.addPreferredGap(ComponentPlacement.RELATED, 265, Short.MAX_VALUE)
+							.addPreferredGap(ComponentPlacement.UNRELATED)
+							.addComponent(chckbxRootguard, GroupLayout.PREFERRED_SIZE, 79, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.RELATED, 184, Short.MAX_VALUE)
 							.addComponent(btnAddVLAN)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnDeleteVLAN))
@@ -887,9 +960,10 @@ public class UI extends JFrame {
 					.addGroup(gl_panelVLAN.createParallelGroup(Alignment.BASELINE)
 						.addComponent(chckbxSwitchLegacyIOS)
 						.addComponent(btnAddVLAN)
-						.addComponent(btnDeleteVLAN))
+						.addComponent(btnDeleteVLAN)
+						.addComponent(chckbxRootguard))
 					.addGap(18)
-					.addComponent(scrollPaneVLAN, GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
+					.addComponent(scrollPaneVLAN, GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addGroup(gl_panelVLAN.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblTrunk)
@@ -902,7 +976,7 @@ public class UI extends JFrame {
 			new Object[][] {
 			},
 			new String[] {
-				"VLAN", "Name", "Interfaces", "IP", "RootGuard", "Root Primary", "Root Secondary"
+				"VLAN", "Name", "Interfaces", "IP", "IPv6", "Root Primary", "Root Secondary"
 			}
 		));
 		tableVLAN.getColumnModel().getColumn(6).setPreferredWidth(94);
@@ -915,7 +989,9 @@ public class UI extends JFrame {
 		JLabel labelSTP = new JLabel("Spanning Tree :");
 		
 		comboBoxSTP = new JComboBox<>();
-		comboBoxSTP.setModel(new DefaultComboBoxModel(new String[] {"None", "PVST", "Rapid-PVST+"}));
+		comboBoxSTP.addItem("None");
+		comboBoxSTP.addItem("PVST");
+		comboBoxSTP.addItem("Rapid-PVST+");
 		
 		textFieldPortFast = new JTextField();
 		textFieldPortFast.setColumns(10);
@@ -1030,29 +1106,31 @@ public class UI extends JFrame {
 	
 	private void saveInterfaceData() {
 		Interface it=(Interface)comboBoxInterface.getSelectedItem();
-		it.IPv4Add=textFieldIpv4Address.getText();
-		it.IPv4Sub=textFieldIpv4Subnet.getText();
-		it.OSPFArea=textFieldOSPFArea.getText();
-		it.IPv6Add=textFieldIpv6Address.getText();
-		it.IPv6Sub=textFieldIpv6Subnet.getText();
-		it.OSPFV3Area=textFieldOSPFv3.getText();
-		it.HSRPIP=textFieldHSRPIP.getText();
-		it.HSRPPrio=textFieldHSRPPriority.getText();
-		it.HSRPID=textFieldHSRPID.getText();
-		it.HSRPV3IP=textFieldHSRPv3IP.getText();
-		it.HSRPV3Prio=textFieldHSRPv3Priority.getText();
-		it.HSRPV3ID=textFieldHSRPV3ID.getText();
-		it.BGPAS=textFieldBGPAS.getText();
-		it.BGPV3AS=textFieldBGPV3AS.getText();
-		
-		it.EIGRPEn=chckbxEIGRP.isSelected();
-		it.RIPEn=chckbxRipv2.isSelected();
-		it.BGPEn=chckbxBgp.isSelected();
-		it.OSPFV3En=chckbxOspfv3.isSelected();
-		it.EIGRPv6En=chckbxEigrpIpv6.isSelected();
-		it.RIPngEn=chckbxRipng.isSelected();
-		it.BGPv6En=checkBoxBgpv3.isSelected();
-		it.OSPFEn=chckbxInterfaceOSPF.isSelected();
+		if (it!=null) {
+			it.IPv4Add=textFieldIpv4Address.getText();
+			it.IPv4Sub=textFieldIpv4Subnet.getText();
+			it.OSPFArea=textFieldOSPFArea.getText();
+			it.IPv6Add=textFieldIpv6Address.getText();
+			it.IPv6Sub=textFieldIpv6Subnet.getText();
+			it.OSPFV3Area=textFieldOSPFv3.getText();
+			it.HSRPIP=textFieldHSRPIP.getText();
+			it.HSRPPrio=textFieldHSRPPriority.getText();
+			it.HSRPID=textFieldHSRPID.getText();
+			it.HSRPV3IP=textFieldHSRPv3IP.getText();
+			it.HSRPV3Prio=textFieldHSRPv3Priority.getText();
+			it.HSRPV3ID=textFieldHSRPV3ID.getText();
+			it.BGPAS=textFieldBGPAS.getText();
+			it.BGPV3AS=textFieldBGPV3AS.getText();
+			
+			it.EIGRPEn=chckbxEIGRP.isSelected();
+			it.RIPEn=chckbxRipv2.isSelected();
+			it.BGPEn=chckbxBgp.isSelected();
+			it.OSPFV3En=chckbxOspfv3.isSelected();
+			it.EIGRPv6En=chckbxEigrpIpv6.isSelected();
+			it.RIPngEn=chckbxRipng.isSelected();
+			it.BGPv6En=checkBoxBgpv3.isSelected();
+			it.OSPFEn=chckbxInterfaceOSPF.isSelected();
+		}
 	}
 	
 	private void setupSTPSaveData() {
@@ -1118,11 +1196,7 @@ public class UI extends JFrame {
 		CCG.uplinkFast=chckbxUplinkfast.isSelected();
 	}
 	
-	public void generateCommands() {
-		StringBuilder sb=new StringBuilder();
-		addCommand(sb,"en"); addCommand(sb,"conf t");
-		if (!textFieldHostname.getText().isEmpty()) addCommand(sb,"hostname "+textFieldHostname.getText());
-		addCommand(sb,"ipv6 uni");
+	public void generateInterfaceCommands(StringBuilder sb) {
 		for (Interface it : CCG.ints) {
 			addCommand(sb,"int "+it.name);
 			if (it.name.contains(".")) {
@@ -1152,6 +1226,7 @@ public class UI extends JFrame {
 				if (it.RIPEn) {
 					addCommand(sb,"exit");
 					addCommand(sb,"router rip");
+					addCommand(sb,"no auto-sum");
 					addCommand(sb,"network "+Utility.getSubnetAddress(it.IPv4Add, Integer.parseInt(it.IPv4Sub)));
 					addCommand(sb,"exit");
 					addCommand(sb,"int "+it.name);
@@ -1198,6 +1273,8 @@ public class UI extends JFrame {
 				if (it.BGPv6En) {
 					addCommand(sb,"exit");
 					addCommand(sb,"router bgp "+it.BGPV3AS);
+					addCommand(sb,"address-family ipv6");
+					addCommand(sb,"network "+Utility.getSubnetAddressV6(it.IPv6Add, Integer.parseInt(it.IPv6Sub))+"/"+it.IPv6Sub);
 					addCommand(sb,"exit");
 					addCommand(sb,"int "+it.name);
 				}
@@ -1206,8 +1283,11 @@ public class UI extends JFrame {
 					addCommand(sb,"standby "+it.HSRPV3ID+" priority "+it.HSRPV3Prio);
 				}
 			}
+			addCommand(sb,"exit");
 		}
-		
+	}
+	
+	public void generateSTPCommands(StringBuilder sb) {
 		if (comboBoxSTP.getSelectedIndex()==1) addCommand(sb,"span mode pvst");
 		else if (comboBoxSTP.getSelectedIndex()==2) addCommand(sb,"span mode rapid");
 		
@@ -1221,7 +1301,314 @@ public class UI extends JFrame {
 				addCommand(sb,"exit");
 			}
 		}
+	}
+	
+	public void generateStaticRoutingCommands(StringBuilder sb) {
+		int staticRouteRows=tableStaticRouting.getModel().getRowCount();
+		int staticRouteIPIndex=-1; int staticRouteSubnetIndex=-1; int staticRouteNextHopIndex=-1;
+		
+		for (int i=0;i<tableStaticRouting.getColumnCount();i++) {
+			switch ((String)tableStaticRouting.getColumnName(i)) {
+				case "Network Address" : {
+					staticRouteIPIndex=i;
+					break;
+				}
+				case "Subnet Prefix" : {
+					staticRouteSubnetIndex=i;
+					break;
+				}
+				case "Next Hop" : {
+					staticRouteNextHopIndex=i;
+					break;
+				}
+			}
+		}
 
+		for (int i=0;i<staticRouteRows;i++) {
+			String ip=(String)tableStaticRouting.getValueAt(i,staticRouteIPIndex);
+			if (ip.contains(".")) {
+				int subnet=Integer.parseInt((String)tableStaticRouting.getValueAt(i,staticRouteSubnetIndex));
+				if (subnet>0) {
+					addCommand(sb,"ip route "+ip+" "+Utility.getWildcardMask(subnet)+
+							   " "+(String)tableStaticRouting.getValueAt(i,staticRouteNextHopIndex));
+				} else {
+					addCommand(sb,"ip route "+ip+" 0.0.0.0"+
+							   " "+(String)tableStaticRouting.getValueAt(i,staticRouteNextHopIndex));
+				}
+			} else if (ip.contains(":")) {
+				int subnet=Integer.parseInt((String)tableStaticRouting.getValueAt(i,staticRouteSubnetIndex));
+				addCommand(sb,"ipv6 route "+ip+"/"+subnet+
+						   " "+(String)tableStaticRouting.getValueAt(i,staticRouteNextHopIndex));
+			}
+		}
+	}
+	
+	public void generateOSPFCommands (StringBuilder sb) {
+		int rows=tableOSPFSummaryAddress.getModel().getRowCount();
+		int summaryIndex=-1; int subnetIndex=-1; int areaIndex=-1;
+		
+		for (int i=0;i<tableOSPFSummaryAddress.getColumnCount();i++) {
+			switch ((String)tableOSPFSummaryAddress.getColumnName(i)) {
+				case "Address" : {
+					summaryIndex=i;
+					break;
+				}
+				case "Subnet Prefix" : {
+					subnetIndex=i;
+					break;
+				}
+				case "Area" : {
+					areaIndex=i;
+					break;
+				}
+			}
+		}
+		
+		for (int i=0;i<rows;i++) {
+			String area=(String)tableOSPFSummaryAddress.getModel().getValueAt(i,areaIndex);
+			String add=(String)tableOSPFSummaryAddress.getModel().getValueAt(i,summaryIndex);
+			String subnet=(String)tableOSPFSummaryAddress.getModel().getValueAt(i,subnetIndex);
+			if (add.contains(".")) {
+				addCommand(sb,"router ospf 1");
+				addCommand(sb,"area "+area+" range "+add+" "+Utility.getSubnetMask(Integer.parseInt(subnet)));
+				addCommand(sb,"exit");
+			} else if (add.contains(":")) {
+				addCommand(sb,"ipv6 router ospf 1");
+				addCommand(sb,"area "+area+" range "+add+" "+Utility.getSubnetMask(Integer.parseInt(subnet)));
+				addCommand(sb,"exit");
+			}
+		}
+		
+		String passInt=textFieldOSPFPassiveInterfaces.getText();
+		if (passInt!=null && !passInt.isEmpty()) {
+			addCommand(sb,"router ospf 1");
+			for (String in : passInt.split(";")) {
+				addCommand(sb,"pass "+in);
+			}
+			addCommand(sb,"exit");
+		}
+		
+		passInt=textFieldOSPFPassiveInterfacesV3.getText();
+		if (passInt!=null && !passInt.isEmpty()) {
+			addCommand(sb,"ipv6 router ospf 1");
+			for (String in : passInt.split(";")) {
+				addCommand(sb,"pass "+in);
+			}
+			addCommand(sb,"exit");
+		}
+		
+		if (chckbxOSPFRedistributeEigrp.isSelected() || chckbxOSPFRedistributeBgp.isSelected() || chckbxOSPFRedistributeRip.isSelected() || chckbxOSPFRedistributeStatic.isSelected()) {
+			addCommand(sb,"router ospf 1");
+			if (chckbxOSPFRedistributeEigrp.isSelected()) addCommand(sb,"redist eigrp 1 subnets");
+			if (chckbxOSPFRedistributeBgp.isSelected()) addCommand(sb,"redist bgp "+textFieldOSPFRedistributeBGPAS.getText()+" subnets");
+			if (chckbxOSPFRedistributeRip.isSelected()) addCommand(sb,"redist rip subnets");
+			if (chckbxOSPFRedistributeStatic.isSelected()) addCommand(sb,"redist static subnets");
+			addCommand(sb,"exit");
+		}
+		
+		if (chckbxOSPFRedistributeEigrpV6.isSelected() || chckbxOSPFRedistributeBgpV6.isSelected() || chckbxOSPFRedistributeRipng.isSelected() || chckbxOSPFRedistributeStaticV6.isSelected()) {
+			addCommand(sb,"ipv6 router ospf 1");
+			if (chckbxOSPFRedistributeEigrpV6.isSelected()) addCommand(sb,"redist eigrp 1");
+			if (chckbxOSPFRedistributeBgpV6.isSelected()) addCommand(sb,"redist bgp "+textFieldOSPFRedistributeBGPAS.getText());
+			if (chckbxOSPFRedistributeRipng.isSelected()) addCommand(sb,"redist rip 1");
+			if (chckbxOSPFRedistributeStaticV6.isSelected()) addCommand(sb,"redist static");
+			addCommand(sb,"exit");
+		}
+	}
+	
+	public void generateEIGRPCommands (StringBuilder sb) {
+		if (chckbxEIGRPNoSummary.isSelected()) {
+			addCommand(sb,"router eigrp 1");
+			addCommand(sb,"no auto");
+			addCommand(sb,"exit");
+		}
+		
+		String passInt=textFieldEIGRPPassiveInterfaces.getText();
+		if (passInt!=null && !passInt.isEmpty()) {
+			addCommand(sb,"router eigrp 1");
+			for (String in : passInt.split(";")) {
+				addCommand(sb,"pass "+in);
+			}
+			addCommand(sb,"exit");
+		}
+		
+		passInt=textFieldEIGRPPassiveInterfacesV6.getText();
+		if (passInt!=null && !passInt.isEmpty()) {
+			addCommand(sb,"ipv6 router eigrp 1");
+			for (String in : passInt.split(";")) {
+				addCommand(sb,"pass "+in);
+			}
+			addCommand(sb,"exit");
+		}
+		
+		if (chckbxEIGRPRedistributeOspf.isSelected() || chckbxEIGRPRedistributeBgp.isSelected() || chckbxEIGRPRedistributeRip.isSelected() || chckbxEIGRPRedistributeStatic.isSelected()) {
+			addCommand(sb,"router eigrp 1");
+			if (chckbxEIGRPRedistributeOspf.isSelected()) addCommand(sb,"redist ospf 1 metric 10000 100 255 1 1500");
+			if (chckbxEIGRPRedistributeBgp.isSelected()) addCommand(sb,"redist bgp "+textFieldEIGRPRedistributeBGPAS.getText()+" metric 8000 100 255 1 1500");
+			if (chckbxEIGRPRedistributeRip.isSelected()) addCommand(sb,"redist rip metric 5000 100 255 1 1500");
+			if (chckbxEIGRPRedistributeStatic.isSelected()) addCommand(sb,"redist static metric 15000 100 255 1 1500");
+			addCommand(sb,"exit");
+		}
+		
+		if (chckbxEIGRPRedistributeOSPFv3.isSelected() || chckbxEIGRPRedistributeBgpV6.isSelected() || chckbxEIGRPRedistributeRipng.isSelected() || chckbxEIGRPRedistributeStaticV6.isSelected()) {
+			addCommand(sb,"ipv6 router eigrp 1");
+			if (chckbxEIGRPRedistributeOSPFv3.isSelected()) addCommand(sb,"redist ospf 1 metric 10000 100 255 1 1500");
+			if (chckbxEIGRPRedistributeBgpV6.isSelected()) addCommand(sb,"redist bgp "+textFieldEIGRPRedistributeBGPAS.getText()+" metric 8000 100 255 1 1500");
+			if (chckbxEIGRPRedistributeRipng.isSelected()) addCommand(sb,"redist rip 1 metric 5000 100 255 1 1500");
+			if (chckbxEIGRPRedistributeStaticV6.isSelected()) addCommand(sb,"redist static  metric 15000 100 255 1 1500");
+			addCommand(sb,"exit");
+		}
+	}
+	
+	public void generateBGPCommands(StringBuilder sb) {
+		String bgpAS=textFieldBGPAS.getText();
+		if (bgpAS!=null && !bgpAS.isEmpty()) {
+			addCommand(sb,"router bgp "+bgpAS);
+			addCommand(sb,"exit");
+			
+			int rows=tableBGPNeighbors.getModel().getRowCount();
+			int IPIndex=-1; int asIndex=-1;
+			
+			for (int i=0;i<tableBGPNeighbors.getColumnCount();i++) {
+				switch ((String)tableBGPNeighbors.getColumnName(i)) {
+					case "IP Address" : {
+						IPIndex=i;
+						break;
+					}
+					case "Remote-AS" : {
+						asIndex=i;
+						break;
+					}
+				}
+			}
+			
+
+			for (int i=0;i<rows;i++) {
+				addCommand(sb,"router bgp "+bgpAS);
+				String ip=(String)tableBGPNeighbors.getModel().getValueAt(i,IPIndex);
+				addCommand(sb,"neighbor "+ip+" remote-as "+(String)tableBGPNeighbors.getModel().getValueAt(i,asIndex));
+				if (ip.contains(".")) {
+					addCommand(sb,"address-family ipv4");
+					addCommand(sb,"neighbor "+ip+" activate");
+					addCommand(sb,"exit");
+				} else if (ip.contains(":")){
+					addCommand(sb,"address-family ipv6");
+					addCommand(sb,"neighbor "+ip+" activate");
+					addCommand(sb,"exit");
+				}
+				addCommand(sb,"exit");
+			}
+			
+			
+		}
+	}
+	
+	public void generateVLANCommands (StringBuilder sb) {
+		int rows=tableVLAN.getModel().getRowCount();
+		int vlanIndex=-1; int nameIndex=-1; int intIndex=-1;
+		int ipIndex=-1; int ipv6Index=-1; int rootPrimaryIndex=-1; int rootSecondaryIndex=-1;
+		
+		for (int i=0;i<tableVLAN.getColumnCount();i++) {
+			switch ((String)tableVLAN.getColumnName(i)) {
+				case "VLAN" : {
+					vlanIndex=i;
+					break;
+				}
+				case "Name" : {
+					nameIndex=i;
+					break;
+				}
+				case "Interfaces" : {
+					intIndex=i;
+					break;
+				}
+				case "IP" : {
+					ipIndex=i;
+					break;
+				}
+				case "IPv6" : {
+					ipv6Index=i;
+					break;
+				}
+				case "Root Primary" : {
+					rootPrimaryIndex=i;
+					break;
+				}
+				case "Root Secondary" : {
+					rootSecondaryIndex=i;
+					break;
+				}
+			}
+		}
+		
+		for (int i=0;i<rows;i++) {
+			String vlan=(String)tableVLAN.getModel().getValueAt(i,vlanIndex);
+			String name=(String)tableVLAN.getModel().getValueAt(i,nameIndex);
+			String inter=(String)tableVLAN.getModel().getValueAt(i,intIndex);
+			String ip=(String)tableVLAN.getModel().getValueAt(i,ipIndex);
+			String ipv6=(String)tableVLAN.getModel().getValueAt(i,ipv6Index);
+			String rootPrim=(String)tableVLAN.getModel().getValueAt(i,rootPrimaryIndex);
+			String rootSec=(String)tableVLAN.getModel().getValueAt(i,rootSecondaryIndex);
+			
+			if (chckbxSwitchLegacyIOS.isSelected()) {
+				addCommand(sb,"exit");
+				addCommand(sb,"vlan database");
+				if (name!=null && !name.isEmpty()) addCommand(sb,"vlan "+vlan+" name "+name);
+				else addCommand(sb,"vlan "+vlan);
+				addCommand(sb,"exit");
+				addCommand(sb,"conf t");
+			} else {
+				addCommand(sb,"vlan "+vlan);
+				if (name!=null && !name.isEmpty()) addCommand(sb,"name "+name);
+				addCommand(sb,"exit");
+			}
+			
+			addCommand(sb,"int vlan "+vlan);
+			if (ip!=null && !ip.isEmpty()) addCommand(sb,"ip add "+ip);
+			if (ipv6!=null && !ipv6.isEmpty()) addCommand(sb,"ipv6 add "+ipv6);
+			addCommand(sb,"exit");
+			
+			if (inter!=null && !inter.isEmpty()) {
+				for (String in : inter.split(";")) {
+					addCommand(sb,"int "+in);
+					addCommand(sb,"switchport mode access");
+					addCommand(sb,"switchport access vlan "+vlan);
+					addCommand(sb,"exit");
+				}
+			}
+			
+			if (rootPrim!=null && !rootPrim.isEmpty()) addCommand(sb,"span vlan "+vlan+" root primary");
+			if (rootSec!=null && !rootSec.isEmpty()) addCommand(sb,"span vlan "+vlan+" root secondary");
+		}
+		
+		String trunks=textFieldTrunk.getText();
+		if (trunks!=null && !trunks.isEmpty()) {
+			for (String in : trunks.split(";")) {
+				addCommand(sb,"int "+in);
+				addCommand(sb,"switchport mode trunk");
+				for (int i=0;i<rows;i++) {
+					String vlan=(String)tableVLAN.getModel().getValueAt(i,vlanIndex);
+					addCommand(sb,"switchport trunk allowed vlan add "+vlan);
+				}
+				addCommand(sb,"exit");
+			}
+		}
+	}
+	
+	public void generateCommands() {
+		StringBuilder sb=new StringBuilder();
+		addCommand(sb,"en"); addCommand(sb,"conf t");
+		if (!textFieldHostname.getText().isEmpty()) addCommand(sb,"hostname "+textFieldHostname.getText());
+		addCommand(sb,"ipv6 uni"); addCommand(sb,"ip routing");
+		
+		generateInterfaceCommands(sb);
+		generateSTPCommands(sb);
+		generateStaticRoutingCommands(sb);
+		generateOSPFCommands(sb);
+		generateEIGRPCommands(sb);
+		generateBGPCommands(sb);
+		generateVLANCommands(sb);
+		
 		CommandDialog diag=new CommandDialog(sb.toString());
 		diag.setLocationRelativeTo(null);
 		diag.setVisible(true);
